@@ -2,9 +2,13 @@
 
 [![Install with npx skills add](https://img.shields.io/badge/Install%20with-npx%20skills%20add-blue)](https://github.com/anthropics/skills)
 
-A collection of agent skills for Claude Code.
+A collection of agent skills.
 
 ## Available Skills
+
+### [ponytail-skill](https://github.com/atpaawej/ponytail-skill)
+
+User-invoked lazy senior dev mode for AI agents. Type `ponytail` when coding to activate the 7-rung ladder. Never auto-invokes.
 
 ### [strategic-programming](strategic-programming/)
 
@@ -12,12 +16,12 @@ Applies strategic design discipline before writing code — deep modules, inform
 
 ## Installation
 
-```bash
-npx skills add https://github.com/pathanaawej0-dot/skills.git
+```
+npx skills add atpaawej/skills
 ```
 
 Or install a single skill:
 
-```bash
-npx skills add https://github.com/pathanaawej0-dot/skills.git/strategic-programming
+```
+npx skills add atpaawej/skills/strategic-programming
 ```
