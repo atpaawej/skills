@@ -8,14 +8,25 @@ Agent skills for Claude Code and other coding agents. Small, focused, composable
 npx skills@latest add atpaawej/skills
 ```
 
-Pick the skills you want. Run `/agent-md` or `/strategic-programming` in your agent. Done.
+Pick the skills you want. Run `/agent-md` or `/coding-standards` in your agent. Done.
 
 Or install individually:
 
 ```bash
 npx skills@latest add atpaawej/skills/agent-md
 npx skills@latest add atpaawej/skills/strategic-programming
+npx skills@latest add atpaawej/skills/coding-standards
 ```
+
+## Skills
+
+User-invoked — type `/skill-name` to run them.
+
+| Skill | What it does |
+|---|---|
+| [`agent-md`](agent-md/) | Create or update `AGENTS.md` / `CLAUDE.md` for any project. Interviews for context, generates the canonical template, or audits and updates when the project evolves. |
+| [`coding-standards`](coding-standards/) | Create or maintain `CODING_STANDARDS.md` for any project. Grills you on conventions, infers from the codebase, or both. Three modes: greenfield (grill-only), infer (explore-driven), or grill over existing code. Self-contained — no external dependencies. |
+| [`strategic-programming`](strategic-programming/) | Applies strategic design discipline before writing code — deep modules, information hiding, clean seams. Use during architecture, planning, and code review. |
 
 ## Why These Skills Exist
 
@@ -29,7 +40,17 @@ npx skills@latest add atpaawej/skills/strategic-programming
 
 **The Fix** is [`/agent-md`](agent-md/). It creates or maintains an `AGENTS.md` / `CLAUDE.md` file that tells the agent exactly how your project works — commands first, then structure, conventions, boundaries, and verifiable definitions of done. One interview, and every future session starts with the right context.
 
-### #2: The Codebase Turns Into A Ball Of Mud
+### #2: The Codebase Has No Consistent Standards
+
+> "Any fool can write code that a computer can understand. Good programmers write code that humans can understand."
+>
+> Martin Fowler
+
+**The Problem**: Without documented conventions, every developer (and every agent) writes code a slightly different way. Files drift from one style to another. Code reviews fill up with formatting nits. New joiners — human or AI — have no compass for "how we do things here."
+
+**The Fix** is [`/coding-standards`](coding-standards/). It creates a `CODING_STANDARDS.md` that tells everyone what's expected — naming, style, file organization, testing philosophy, error handling. Three modes let you start from scratch, extract conventions from existing code, or combine both. Maintenance mode catches drift so standards don't rot.
+
+### #3: The Codebase Turns Into A Ball Of Mud
 
 > "The best modules are deep. They allow a lot of functionality to be accessed through a simple interface."
 >
@@ -39,11 +60,14 @@ npx skills@latest add atpaawej/skills/strategic-programming
 
 **The Fix** is [`/strategic-programming`](strategic-programming/). It applies a structured design process before any code is written — map the seams, design for depth, trace the change, verify test signal, match conventions. The change stays local, the interface stays small, and the codebase stays navigable.
 
-## Reference
+## Design Principles
 
-Skills are **user-invoked** — you type `/skill-name` to run them.
+- **Self-contained.** Each skill owns its logic. No external dependencies, no runtime, no package install.
+- **Composable.** Skills can be installed individually or as a set. Use what fits, skip the rest.
+- **Predictable.** Every step has a completion criterion. The agent takes the same process every run.
+- **Progressive disclosure.** The `SKILL.md` is lean. Reference material lives in linked files, loaded only when needed.
+- **User-invoked.** Skills fire when you type them — never when the agent guesses.
 
-| Skill | Description |
-|---|---|
-| [`agent-md`](agent-md/) | Create or update AGENTS.md / CLAUDE.md for any project. Interviews for context, generates the canonical template, or audits and updates an existing file when the project evolves. |
-| [`strategic-programming`](strategic-programming/) | Applies strategic design discipline before writing code — deep modules, information hiding, change boundaries. Use during architecture, planning, and code review. |
+## License
+
+MIT
