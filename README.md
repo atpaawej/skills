@@ -17,6 +17,7 @@ npx skills@latest add atpaawej/skills/agent-md
 npx skills@latest add atpaawej/skills/strategic-programming
 npx skills@latest add atpaawej/skills/coding-standards
 npx skills@latest add atpaawej/skills/design-ocp
+npx skills@latest add atpaawej/skills/improve-ocp
 ```
 
 ## Skills
@@ -29,6 +30,7 @@ User-invoked — type `/skill-name` to run them.
 | [`coding-standards`](coding-standards/) | Create or maintain `CODING_STANDARDS.md` for any project. Grills you on conventions, infers from the codebase, or both. Three modes: greenfield (grill-only), infer (explore-driven), or grill over existing code. Self-contained — no external dependencies. |
 | [`strategic-programming`](strategic-programming/) | Applies strategic design discipline before writing code — deep modules, information hiding, clean seams. Use during architecture, planning, and code review. |
 | [`design-ocp`](design-ocp/) | Design a codebase that's **closed for modification, open for extension**. Defines the closed core, extension points, dependency rules, and agent contract so every new feature is a new file — never an edit to stable code. |
+| [`improve-ocp`](improve-ocp/) | **Retrofit** an existing messy codebase toward OCP. Scans for 7 violation signals, proposes a target OCP map, and produces an actionable `IMPROVE-OCP.md` you approve and hand to an agent. |
 
 ## Why These Skills Exist
 
@@ -70,10 +72,10 @@ User-invoked — type `/skill-name` to run them.
 
 **The Problem**: Agents don't know what they shouldn't touch. You ask for a new feature, the agent finds existing code that's *close* to what you want, edits it — and breaks tested, working functionality. Every new feature becomes a game of whack-a-mole.
 
-**The Fix** is [`/design-ocp`](design-ocp/). It produces two things:
+**The Fix** is the OCP skill pair:
 
-1. **`OCP-MAP.md`** — maps the closed zones (never touch) and open extension points (where new code plugs in), giving the agent a binary "am I allowed to modify this?" test for every file.
-2. **An agent contract** for `CLAUDE.md` / `AGENTS.md` — encodes the rules: *"New features are new files implementing extension points. Never modify closed zones. If you believe a core change is needed, stop and ask."*
+1. [`/design-ocp`](design-ocp/) — greenfield. Produces `OCP-MAP.md` + agent contract for `CLAUDE.md`.
+2. [`/improve-ocp`](improve-ocp/) — retrofit. Scans existing codebases for OCP violations, produces `IMPROVE-OCP.md` you approve and hand to an agent.
 
 *You are the architect. The agent is the syntax writer. Design the interface, delegate the implementation.*
 
