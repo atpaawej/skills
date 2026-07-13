@@ -10,9 +10,9 @@ Bold terms defined in [GLOSSARY.md](references/GLOSSARY.md).
 
 ## Entry
 
-**No `OCP-MAP.md`** — greenfield. Proceed to step 1.
-
-(If you're retrofitting an existing messy codebase, that's a different job — `/improve-ocp` once it exists. For now, adapt the greenfield flow.)
+- **No `OCP-MAP.md`** — greenfield. Proceed to step 1.
+- **`OCP-MAP.md` exists** — Stop. The map is already set up. Read it and follow existing extension points. No mapping needed.
+- **Retrofitting a messy codebase** — That's a different job (`/improve-ocp`, once written). For now, adapt the greenfield flow.
 
 ## Steps
 
@@ -46,6 +46,8 @@ State the **dependency rule** and confirm:
 Populate the [template](references/ocp-map-template.md) → project root as `OCP-MAP.md`.
 
 Show user. Iterate until "ship it."
+
+**Audit:** After the map is finalized, check **change density** — would a typical new feature touch exactly 1 file (the new plugin)? Higher density means a missed extension point. Surface this to the user before approving.
 
 **Criterion:** User-approved, no placeholder text.
 
