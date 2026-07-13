@@ -32,20 +32,25 @@ Do NOT ask the user during this step. Just sweep and collect.
 
 ### 2. Design — propose the target
 
-From the violations cluster, design the target OCP map:
+From the violations cluster, design the target OCP map.
 
-1. Identify which directories naturally form a **closed core** — the domain entities, business rules, and framework code that new features should never touch
-2. Identify which violation clusters point at an **extension category** — payment providers, notification channels, export formats, etc.
-3. For each extension category, propose the **extension point interface** — minimum viable method set
-4. Recommend a **registration** mechanism — convention, registry, config file, or DI binding
-5. State the **dependency rule**
+**For each closed zone you propose:**
+- [ ] Name it and anchor it to a directory
 
-**Present to the user for confirmation:**
+**For each extension category you propose, you must complete ALL three sub-items before presenting:**
+- [ ] **Sketch the interface** — minimum viable method set the plugin must implement. Write it as a concrete signature the agent can use to scaffold later.
+- [ ] **Choose the registration mechanism** — convention, registry function, config file, or DI binding
+- [ ] **State the dependency rule** — "closed core never imports extension code; extensions import core interfaces only"
+
+Do NOT skip any of these three. If you aren't sure about a mechanism, pick the simplest option and flag it to the user.
+
+**Then present to the user for confirmation:**
+
 > "Here's what the signals tell me. I see these closed zones and extension categories forming. Does this match your understanding of the codebase? Any adjustments?"
 
 Let the user adjust before writing.
 
-**Criterion:** At least 1 closed zone and 1 extension point proposed. User has confirmed or adjusted the target.
+**Criterion:** Every closed zone named and anchored. Every extension category has an interface sketch, a registration mechanism, and a dependency rule stated. User has confirmed or adjusted the target.
 
 ### 3. Write — produce IMPROVE-OCP.md
 
