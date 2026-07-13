@@ -13,24 +13,31 @@ Pick the skills you want. Run `/agent-md` or `/coding-standards` in your agent. 
 Or install individually:
 
 ```bash
-npx skills@latest add atpaawej/skills/agent-md
-npx skills@latest add atpaawej/skills/strategic-programming
-npx skills@latest add atpaawej/skills/coding-standards
-npx skills@latest add atpaawej/skills/design-ocp
-npx skills@latest add atpaawej/skills/improve-ocp
+npx skills@latest add atpaawej/skills/skills/project/agent-md
+npx skills@latest add atpaawej/skills/skills/engineering/strategic-programming
+npx skills@latest add atpaawej/skills/skills/engineering/coding-standards
+npx skills@latest add atpaawej/skills/skills/engineering/design-ocp
+npx skills@latest add atpaawej/skills/skills/engineering/improve-ocp
 ```
 
 ## Skills
 
 User-invoked — type `/skill-name` to run them.
 
+### `engineering/` — code design, standards, architecture
+
 | Skill | What it does |
 |---|---|
-| [`agent-md`](agent-md/) | Create or update `AGENTS.md` / `CLAUDE.md` for any project. Interviews for context, generates the canonical template, or audits and updates when the project evolves. |
-| [`coding-standards`](coding-standards/) | Create or maintain `CODING_STANDARDS.md` for any project. Grills you on conventions, infers from the codebase, or both. Three modes: greenfield (grill-only), infer (explore-driven), or grill over existing code. Self-contained — no external dependencies. |
-| [`strategic-programming`](strategic-programming/) | Applies strategic design discipline before writing code — deep modules, information hiding, clean seams. Use during architecture, planning, and code review. |
-| [`design-ocp`](design-ocp/) | Design a codebase that's **closed for modification, open for extension**. Defines the closed core, extension points, dependency rules, and agent contract so every new feature is a new file — never an edit to stable code. |
-| [`improve-ocp`](improve-ocp/) | **Retrofit** an existing messy codebase toward OCP. Scans for 7 violation signals, proposes a target OCP map, and produces an actionable `IMPROVE-OCP.md` you approve and hand to an agent. |
+| [`coding-standards`](skills/engineering/coding-standards/) | Create or maintain `CODING_STANDARDS.md` for any project. Grills you on conventions, infers from the codebase, or both. Three modes: greenfield (grill-only), infer (explore-driven), or grill over existing code. |
+| [`strategic-programming`](skills/engineering/strategic-programming/) | Applies strategic design discipline before writing code — deep modules, information hiding, clean seams. Use during architecture, planning, and code review. |
+| [`design-ocp`](skills/engineering/design-ocp/) | Design a codebase that's **closed for modification, open for extension**. Defines the closed core, extension points, dependency rules, and agent contract so every new feature is a new file — never an edit to stable code. |
+| [`improve-ocp`](skills/engineering/improve-ocp/) | **Retrofit** an existing messy codebase toward OCP. Scans for 7 violation signals, proposes a target OCP map, and produces an actionable `IMPROVE-OCP.md` you approve and hand to an agent. |
+
+### `project/` — project setup
+
+| Skill | What it does |
+|---|---|
+| [`agent-md`](skills/project/agent-md/) | Create or update `AGENTS.md` / `CLAUDE.md` for any project. Interviews for context, generates the canonical template, or audits and updates when the project evolves. |
 
 ## Why These Skills Exist
 
@@ -42,7 +49,7 @@ User-invoked — type `/skill-name` to run them.
 
 **The Problem**: Every time you start a session with an agent, it knows nothing about your project — what commands to run, where things live, what conventions to follow. So it guesses. It uses the wrong test runner, touches files it shouldn't, and produces code that doesn't fit.
 
-**The Fix** is [`/agent-md`](agent-md/). It creates or maintains an `AGENTS.md` / `CLAUDE.md` file that tells the agent exactly how your project works — commands first, then structure, conventions, boundaries, and verifiable definitions of done. One interview, and every future session starts with the right context.
+**The Fix** is [`/agent-md`](skills/project/agent-md/). It creates or maintains an `AGENTS.md` / `CLAUDE.md` file that tells the agent exactly how your project works — commands first, then structure, conventions, boundaries, and verifiable definitions of done. One interview, and every future session starts with the right context.
 
 ### #2: The Codebase Has No Consistent Standards
 
@@ -52,7 +59,7 @@ User-invoked — type `/skill-name` to run them.
 
 **The Problem**: Without documented conventions, every developer (and every agent) writes code a slightly different way. Files drift from one style to another. Code reviews fill up with formatting nits. New joiners — human or AI — have no compass for "how we do things here."
 
-**The Fix** is [`/coding-standards`](coding-standards/). It creates a `CODING_STANDARDS.md` that tells everyone what's expected — naming, style, file organization, testing philosophy, error handling. Three modes let you start from scratch, extract conventions from existing code, or combine both. Maintenance mode catches drift so standards don't rot.
+**The Fix** is [`/coding-standards`](skills/engineering/coding-standards/). It creates a `CODING_STANDARDS.md` that tells everyone what's expected — naming, style, file organization, testing philosophy, error handling. Three modes let you start from scratch, extract conventions from existing code, or combine both. Maintenance mode catches drift so standards don't rot.
 
 ### #3: The Codebase Turns Into A Ball Of Mud
 
@@ -62,7 +69,7 @@ User-invoked — type `/skill-name` to run them.
 
 **The Problem**: Agents accelerate software entropy. They write code fast, and without design discipline, the codebase becomes complex and hard to change at an unprecedented rate.
 
-**The Fix** is [`/strategic-programming`](strategic-programming/). It applies a structured design process before any code is written — map the seams, design for depth, trace the change, verify test signal, match conventions. The change stays local, the interface stays small, and the codebase stays navigable.
+**The Fix** is [`/strategic-programming`](skills/engineering/strategic-programming/). It applies a structured design process before any code is written — map the seams, design for depth, trace the change, verify test signal, match conventions. The change stays local, the interface stays small, and the codebase stays navigable.
 
 ### #4: The Agent Keeps Breaking Working Code
 
@@ -74,8 +81,8 @@ User-invoked — type `/skill-name` to run them.
 
 **The Fix** is the OCP skill pair:
 
-1. [`/design-ocp`](design-ocp/) — greenfield. Produces `OCP-MAP.md` + agent contract for `CLAUDE.md`.
-2. [`/improve-ocp`](improve-ocp/) — retrofit. Scans existing codebases for OCP violations, produces `IMPROVE-OCP.md` you approve and hand to an agent.
+1. [`/design-ocp`](skills/engineering/design-ocp/) — greenfield. Produces `OCP-MAP.md` + agent contract for `CLAUDE.md`.
+2. [`/improve-ocp`](skills/engineering/improve-ocp/) — retrofit. Scans existing codebases for OCP violations, produces `IMPROVE-OCP.md` you approve and hand to an agent.
 
 *You are the architect. The agent is the syntax writer. Design the interface, delegate the implementation.*
 
