@@ -1,48 +1,68 @@
 # atpaawej/skills
 
-This repo contains agent skills for Claude Code and other coding agents.
+Agent skills for Claude Code and other coding agents. Small, focused, composable.
 
-## Layout
+## Commands
 
-Skills are organized into bucket folders under `skills/`:
+- Install deps: `npm install`
+- Create changeset: write a `.md` file in `.changeset/` (see workflow below)
+- Version release: `npm run version`
 
-- `engineering/` — code design, standards, architecture
-- `project/` — project setup and onboarding
+No build, test, lint, or type-check commands — this is a pure markdown repo.
 
-## Adding or updating a skill
+## Project Structure
 
-### 1. Make your changes
+- `skills/engineering/` — code design, standards, architecture skills (coding-standards, strategic-programming, design-ocp, improve-ocp)
+- `skills/project/` — project setup skills (agent-md)
+- `.changeset/` — versioning changeset files
+- `CLAUDE.md` — this file
+- `README.md` — skill index and install instructions
 
-Edit the relevant `SKILL.md` and any reference files.
+## Boundaries
 
-### 2. Create a changeset
+- Never modify: `node_modules/`, `.changeset/README.md` (auto-generated), `package-lock.json` (auto-generated)
+- Ask before: running `npm run version` (this is a manual release step), modifying `package.json` version field
+- Always do: create a changeset `.md` file when adding or updating a skill
 
-After making changes, you MUST create a changeset file. Ask the user:
+## Release Workflow
 
-> "What kind of change is this? (patch / minor / major)"
+### Adding or updating a skill
 
-| Bump | When |
-|---|---|
-| **patch** | Bug fixes, tweaks, wording improvements — no new behaviour |
-| **minor** | New skill, new feature in an existing skill, new reference file |
-| **major** | Breaking change — skill rename, removed skill, changed invocation model |
+1. Make your code changes (edit `SKILL.md` or reference files)
+2. Create a changeset file in `.changeset/<descriptive-name>.md`:
 
-Then write a `.md` file in `.changeset/` with the following format:
+   Ask the user: "What kind of change is this? (patch / minor / major)"
 
-```markdown
----
-"atpaawej-skills": <patch|minor|major>
----
+   | Bump | When |
+   |---|---|
+   | **patch** | Bug fixes, tweaks, wording improvements — no new behaviour |
+   | **minor** | New skill, new feature in an existing skill, new reference file |
+   | **major** | Breaking change — skill rename, removed skill, changed invocation model |
 
-<one or more lines describing the change>
-```
+   Format:
+   ```markdown
+   ---
+   "atpaawej-skills": <patch|minor|major>
+   ---
 
-Name the file `<descriptive-kebab-name>.md`.
+   <description of changes>
+   ```
+3. Commit both the code change and the changeset file together
+4. Do NOT run `npm run version` yourself — that happens during release
 
-### 3. Commit
-
-Commit both the code change and the changeset file together. Do NOT run `npm run version` or bump the version yourself — that happens during release.
-
-## Releasing
+### Releasing
 
 Run `npm run version` to consume all pending changesets, bump the version, and generate `CHANGELOG.md`. Then commit and tag.
+
+## Definition of Done
+
+All of these pass:
+1. Changeset `.md` file created with correct bump type and description
+2. Both skill changes and changeset committed together
+3. `node_modules/` not committed
+
+## Escalation Rules
+
+- If unsure about the bump type (patch/minor/major): ask the user
+- `npm run version` errors: check `.changeset/` for malformed markdown files
+- Never: modify `package-lock.json` by hand, run `npm run version` without user approval
