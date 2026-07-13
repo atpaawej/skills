@@ -1,0 +1,28 @@
+{
+  "name": "atpaawej-skills",
+  "version": "1.0.0",
+  "description": "Agent skills for Claude Code and other coding agents. Small, focused, composable — designed to make agents predictably good at specific tasks.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "changeset": "changeset",
+    "version": "changeset version"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atpaawej/skills.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/atpaawej/skills/issues"
+  },
+  "homepage": "https://github.com/atpaawej/skills#readme",
+  "private": "true",
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0"
+  },
+  "packageManager": "npm@11.13.0"
+}
