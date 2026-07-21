@@ -1,32 +1,59 @@
-# Grilling rhythm
+# Grilling Rhythm
 
-Interview the user relentlessly about coding standards, one topic at a time. Do not ask multiple questions at once — that bewilders the user.
+Interview the user about coding standards, one topic at a time. Walk every applicable section of the template, recommend-first, then confirm.
 
 ## Rules
 
-- **One question at a time.** Ask one question, wait for the answer, then the next.
-- **Look up facts you can find.** If a question can be answered by exploring the codebase, do that instead of asking. Example: "Do you use Prettier?" — check for `.prettierrc` instead. "What test framework?" — check `package.json`, `go.mod`, etc.
-- **Decisions are the user's.** Never guess what they want for naming conventions, style rules, or philosophy. Put each decision to them.
-- **Follow up only when needed.** If they say "camelCase for variables," note it and move on. If they say "I don't know, whatever's standard," recommend a sensible default and confirm: "I'll suggest kebab-case for files and camelCase for variables — sound good?"
-- **No enactment until confirmed.** Do NOT write `CODING_STANDARDS.md` until every applicable section has been covered and the user has seen and approved the full picture.
-- **Stay on the chosen path.** If you're in Greenfield mode, don't try to explore the codebase. If you're in Grill-over-existing mode, lead with your findings: "I noticed the codebase uses X — is that intentional?"
+- **One question at a time.** Ask one, wait for the answer, then the next.
+- **Recommend first.** Never ask a naked question. Always lead with: "I recommend X — good?"
+- **Look up facts you can find.** If a question can be answered by checking config files (`package.json`, `tsconfig.json`, `.prettierrc`, etc.), do that instead of asking.
+- **Decisions are the user's.** Put each one to them and wait for an answer. But you must propose a specific option, not list options.
+- **Confirm you understood.** "So kebab-case for files, camelCase for variables. Correct?"
+- **No enactment until fully confirmed.** Do not write or edit CODING_STANDARDS.md until every applicable section has been covered and the user has approved the full picture.
 
-## Cadence
+## Cadence per section
 
-For each template section:
+For each section in the template:
 
-1. State the section you're covering: "Let's talk about naming conventions."
-2. Ask the specific question(s) for that section, one decision at a time.
-3. Confirm you understood: "So camelCase for variables, PascalCase for types. Correct?"
-4. Move to the next section.
+1. **Announce**: "Let's talk about [section name]."
+2. **State your finding**: "Your project is TypeScript with Prettier configured."
+3. **State your recommendation**: "For naming: I recommend kebab-case for files and camelCase for variables — that's standard in the JS ecosystem."
+4. **Confirm**: "Good?"
+5. **Record the decision.** Move to the next section.
+
+## Sections — order
+
+Walk in this order. MUST and SHOULD sections are always covered. OPTIONAL sections are offered after the essentials.
+
+### MUST (always cover)
+1. Non-Negotiable Architecture Decisions (pull from the principle catalog based on assessment)
+2. Naming Conventions
+3. Code Style & Formatting
+4. Module Boundaries
+5. Error Handling
+
+### SHOULD (always cover)
+6. Testing Standards
+
+### OPTIONAL (offer after essentials)
+7. "We've covered the essentials. This project could also benefit from Type Discipline, Documentation, Commit Conventions, or Performance constraints. Want to add any of those?"
+
+If yes → grill each accepted section the same way: recommend → confirm → move on.
 
 ## Guard
 
-If the user seems unsure or says "I don't know," make a recommendation based on common practice for the project's ecosystem, then confirm:
+If the user seems unsure or says "I don't know," recommend a sensible default for their ecosystem and confirm:
 
-- JavaScript/TypeScript: kebab-case files, camelCase variables/functions, PascalCase types/classes
-- Python: snake_case files/variables/functions, PascalCase classes
-- Go: snake_case files, camelCase exported, PascalCase types
-- Rust: snake_case files/variables/functions, PascalCase types/traits
+- **JavaScript/TypeScript**: kebab-case files, camelCase variables/functions, PascalCase types/classes
+- **Python**: snake_case files/variables/functions, PascalCase classes
+- **Go**: snake_case files, camelCase exported, PascalCase types
+- **Rust**: snake_case files/variables/functions, PascalCase types/traits
+- **Layered architecture** — default to Clean/Onion for web services; skip for CLI tools and libraries
+- **Fail fast** — always recommend for any project type
 
-"I'd recommend kebab-case for file names, which is standard in the JS ecosystem. OK?"
+## Anti-patterns
+
+- ❌ Asking multiple questions at once
+- ❌ Asking "what do you want?" without giving a recommendation
+- ❌ Asking questions you could answer by reading a config file
+- ❌ Drafting the document mid-grill (do that in Step 5)

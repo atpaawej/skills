@@ -1,111 +1,120 @@
 ---
 name: coding-standards
-description: Create or maintain CODING_STANDARDS.md for any project — by grilling the user, inferring from the codebase, or both.
-disable-model-invocation: true
+description: Create CODING_STANDARDS.md for any project — walks through essential principles (OCP, deep modules, fail fast), recommends a tailored baseline, then grills the user to customize.
 ---
 
 # Coding Standards
 
-A **grill**-driven skill. It creates or maintains `CODING_STANDARDS.md` at the project root by picking the right mix of interview and codebase analysis.
+An **opinionated, model-invoked** skill. Creates `CODING_STANDARDS.md` at the project root by assessing the project, recommending a baseline of **MUST / SHOULD / OPTIONAL** principles from a curated catalog, then grilling the user to customize every applicable section.
 
-Three **branches**, picked by the skill and confirmed with you:
+The resulting document is **timeless** — rules-only, no file paths, no architecture maps, nothing that drifts when the codebase evolves.
 
-- **Greenfield** — no code yet. Grills you on each standard section before writing.
-- **Infer** — code exists, no grill. Explores the codebase to extract conventions, then writes.
-- **Grill over existing** — code exists AND you want to be grilled. Explores first, then grills you with the findings as context.
+**Leading words** (compact concepts the model already knows — anchor the skill's behavior):
+- **OCP** — add behaviour by creating new files, not modifying existing ones
+- **Deep Module** — simple interface, substantial hidden implementation
+- **Fail Fast** — detect and report errors at the earliest moment
+- **CQS** — a method is either a command (void) or a query (returns data), never both
+- **YAGNI** — don't add abstraction until the code calls for it
+- **POLA** — principle of least astonishment; code should not surprise
 
-Two **entry points**:
-
-- **Create** — no `CODING_STANDARDS.md` exists. Runs Greenfield, Infer, or Grill over existing.
-- **Maintain** — `CODING_STANDARDS.md` exists. Re-scans the codebase, compares with the doc, flags drift, asks for updates.
+**Target audience for the document:** developers coding with AI agents. The standards are written to reduce ambiguity, provide clear patterns, and give agents a reliable behavioural contract.
 
 ## Steps
 
-### 1. Determine mode and entry point
+### 1. ASSESS — understand the project
 
-Check for `CODING_STANDARDS.md` at project root:
+Gather the minimum context needed to recommend the right principles:
 
-- **If it exists** → Maintain entry point. Announce: "I found CODING_STANDARDS.md. I'll audit it against the current codebase." Proceed to step 4 (Drift scan, then apply).
-- **If it does not exist** → Create entry point. Check whether source code exists by globbing for `*.ts`, `*.js`, `*.tsx`, `*.jsx`, `*.py`, `*.go`, `*.rs`, `*.rb`, `*.java`, `*.cs`, `*.php`.
+- What **language and runtime** is this? (JavaScript/TypeScript, Python, Go, Rust, Java, C#, etc.)
+- What **framework** (if any)?
+- What **linters, formatters, type-checkers** are configured?
+- Is this a **monorepo, single package, or service**?
+- Is it a **new project or an existing codebase**?
 
-  - **No source files found** → Greenfield mode. Announce: "No code found yet — I'll grill you on what standards you want."
-  - **Source files found** → Ask user: "I found source code. I can either **(a) Infer** standards from the codebase by exploring it, or **(b) Grill** you over the existing code, exploring first then interviewing you. Which do you prefer?" Let them pick. Offer override: "Or we can do the other mode if you'd prefer."
+Do NOT explore the codebase beyond what's needed for these five checks. Do NOT report file counts or directory structure — those facts go stale and the document must not contain them.
 
-**Criterion:** Mode is selected, user has confirmed or overridden. No ambiguity about which path to run.
+**Completion criterion:** Language, framework, tooling, project type, and lifecycle stage are known. Not guessed, not assumed — confirmed from config files or package manifests.
 
-### 2. Gather context
+### 2. RESEARCH — load the principle catalog
 
-Depends on the mode.
+Context pointer → [[references/principles.md]]
 
-#### Greenfield mode
+Read the full principle catalog. For each domain, determine which principles apply to the project you assessed:
 
-Load [[references/grilling-rhythm.md]]. Grill the user through every template section, one at a time:
+- For a **CLI tool**: Architecture & Boundaries principles may be less relevant; Discipline & Scope and Error Handling are critical.
+- For a **web service or API**: Layered Architecture, OCP, and Explicit Contracts matter most.
+- For a **library/package**: Deep Modules, CQS, and POLA are top priority.
 
-1. Purpose & scope — what this project is, what CODING_STANDARDS.md covers
-2. Naming conventions — files, variables, functions, classes, types
-3. Code style & formatting — tools, formatter, rules to follow
-4. File & module organization — how code is grouped, imports, folder structure
-5. Error handling — philosophy, patterns, error types
-6. Testing standards — framework, naming, coverage (ask if they want this)
-7. Type/type discipline — if they use typed language (ask if relevant)
-8. Documentation — JSDoc/TSDoc, README per module (ask if they want this)
-9. Git & commit conventions — if not covered elsewhere (ask if relevant)
-10. Performance & security — constraints worth documenting (ask if relevant)
+Form a mental map of: **MUST apply, SHOULD apply, OPTIONAL for this project.** This map drives the baseline presentation in the next step.
 
-**One question at a time.** Wait for the answer before moving to the next topic. If the answer reveals a fact you can check (e.g. "we use Prettier"), you don't need to grill deeper on that — note it and move on. If the answer reveals a decision (e.g. "camelCase for variables"), confirm you've understood correctly before noting it.
+**Completion criterion:** Every domain in the catalog evaluated for this project. No domain skipped. A clear triage (MUST/SHOULD/OPTIONAL) decided, with rationale the skill can explain to the user.
 
-**Completion criterion:** Every section that applies to this project has been covered. Optional sections that don't apply have been explicitly skipped. User has seen and confirmed the full picture.
+### 3. PRESENT BASELINE — propose the tiered recommendation
 
-#### Infer mode
+Tell the user what you found and what you recommend:
 
-Load [[references/codebase-scan.md]]. Use the Agent tool with `subagent_type=Explore` to walk the codebase and populate the scan checklist. Then map findings to template sections:
+1. **Project summary**: "TypeScript monorepo, NestJS, Prettier + ESLint configured. Looks like a web service."
+2. **MUST set**: "Here's what I think every good codebase in your situation needs:" — list the 🔴 MUST principles with one-line rationale each.
+3. **Offer the full picture**: "Beyond these, I have SHOULD and OPTIONAL recommendations. Want to hear them?"
 
-- File naming patterns → Naming conventions
-- Lint/format config → Code style & formatting
-- Framework, directory layout → File & module organization
-- Error handling patterns → Error handling
-- Test patterns → Testing standards (if patterns found)
-- Type usage → Type discipline (if patterns found)
-- Doc comments → Documentation (if patterns found)
+Wait for their answer before proceeding. If they say "yes, show me everything" — present the full SHOULD and OPTIONAL sets too. If they say "looks good, let's go" — skip to the grill with just the MUST set.
 
-Do NOT ask the user questions during this phase. Synthesize from what you find. If the codebase is too young or inconsistent on a topic (e.g. 2 files use try/catch, 2 files use error returns, no clear winner), note the ambiguity in the document.
+**Completion criterion:** User has seen the baseline. They know what tier they're engaging with. No ambiguity about which principles are on the table.
 
-**Completion criterion:** Every discoverable convention is extracted. Template sections with no clear signal are marked as "not yet established" rather than guessed.
+### 4. GRILL — walk every applicable section, one at a time
 
-#### Grill over existing mode
+Context pointer → [[references/grilling-rhythm.md]]
+Context pointer → [[references/coding-standards-template.md]]
 
-First run the Infer mode's exploration (load [[references/codebase-scan.md]], explore, analyze). Then load [[references/grilling-rhythm.md]] and grill the user on each template section, using the scan findings as context: "I noticed most files use kebab-case naming — is that your preferred convention?"
+Load the grilling rhythm. Then for every section in the template that applies:
 
-**Completion criterion:** Codebase explored AND every applicable section grilled. User has confirmed all decisions.
+1. **Announce the section**: "Let's talk about naming conventions."
+2. **State your recommendation**: "For TypeScript, kebab-case for files and camelCase for variables — that's standard. I recommend we adopt that."
+3. **Ask for a decision**: "Good?"
+4. **Wait for answer** — one question at a time. No multi-questions.
+5. **Confirm you understood**: "So kebab-case for files, camelCase for variables. Correct?"
+6. **Move to the next section.**
 
-### 3. Build CODING_STANDARDS.md
+**Order:** Walk MUST sections first, then SHOULD sections, then explicitly offer OPTIONAL sections. "We've covered the essential sections. This project could also benefit from Type Discipline, Documentation, and Commit Conventions — want to add those?"
 
-Load [[references/coding-standards-template.md]]. Populate every applicable section with what you gathered.
+**Rules:**
+- If a *fact* can be found (e.g., "what formatter do you use?"), look it up rather than asking.
+- The *decisions* are the user's — put each one to them and wait.
+- Provide your recommended answer with every question — never ask a naked question.
+- Do NOT draft the document during this step. No enactment until the grill is complete.
 
-Rules:
+**Completion criterion:** Every applicable MUST and SHOULD section has been covered and a decision recorded. OPTIONAL sections explicitly offered and accepted or declined. User has confirmed the full picture.
 
-- Required sections are always present. Optional sections appear only when the mode produced content for them.
-- Use exact examples from the codebase (Infer mode) or from user's answers (Greenfield mode).
-- Present the draft to the user: "Here's what I've drafted. What would you change?"
-- Iterate on feedback. Keep going until user says "ship it" or "looks good."
+### 5. DRAFT — write CODING_STANDARDS.md
 
-**Criterion:** User has approved the document. Document covers every applicable section. No placeholder text remains.
+Load [[references/coding-standards-template.md]]. Populate every section that was agreed during the grill.
 
-### 4. Maintain mode (drift scan)
+**Rules:**
+- Required sections (Purpose & Scope, Naming Conventions, Code Style & Formatting, Module Boundaries, Error Handling) are always present.
+- Optional sections appear only if the user accepted them.
+- Every rule must include both ✅ GOOD and ❌ BAD examples inline — self-contained, no file references.
+- Include the **Boundary System** table (Always Do / Ask First / Never Do).
+- Include a **Verification** section at the end: "Before marking PR ready, run: `npm run lint && npm run typecheck && npm run test`."
+- Never include file paths, directory structures, or architecture-as-it-stands today.
+- Keep the document under ~120 lines. If a rule can be enforced by a linter, do NOT include it.
 
-Read the existing `CODING_STANDARDS.md`. Then load [[references/codebase-scan.md]] and re-explore the codebase. Compare:
+Present the draft: "Here's what I've drafted. What would you change?"
 
-- Does the doc say camelCase but codebase now uses kebab-case? → Flag as drift.
-- Does the doc list a test framework that's no longer used? → Flag as drift.
-- Is the doc's section on error handling still accurate? → Confirm or flag.
-- Are there new tools/patterns in the codebase the doc doesn't mention? → Flag as missing.
+Iterate on feedback. Keep going until the user says "ship it" or "looks good."
 
-Present each drift one at a time: "I found that your doc says X, but the codebase now does Y. Would you like to update it?" Let the user decide per drift. Then apply the approved changes and write the updated file.
+**Completion criterion:** User has approved the document. Every applicable section is populated. No placeholder text remains. No file paths or location facts are present.
 
-**Criterion:** Every drift item presented and resolved (updated or intentionally kept). User confirms the updated doc is accurate.
+### 6. VERIFY — agent self-check
 
-### 5. Write
+Before writing the file, run this checklist:
 
-Write `CODING_STANDARDS.md` to the project root.
+- [ ] Does every rule have a ✅ GOOD and ❌ BAD example pair? (No prose-only rules)
+- [ ] Are there any file paths, directory descriptions, or architecture facts that will go stale? (Delete them)
+- [ ] Is the document under ~120 lines? (If not, prune ruthlessly — run the no-op test per line)
+- [ ] Are there any linter-enforceable rules that slipped through? (Delete them — CI enforces those)
+- [ ] Does the Boundary System table cover everything? (Always / Ask / Never)
+- [ ] Is there a Verification self-check section at the end?
 
-**Criterion:** File exists at `<project-root>/CODING_STANDARDS.md` with no placeholder content.
+If anything fails the checklist, fix it. Then write `CODING_STANDARDS.md` to the project root.
+
+**Completion criterion:** File exists at `<project-root>/CODING_STANDARDS.md`. All checklist items pass. Document matches what the user approved.
