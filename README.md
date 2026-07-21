@@ -28,7 +28,7 @@ User-invoked — type `/skill-name` to run them.
 
 | Skill | What it does |
 |---|---|
-| [`coding-standards`](skills/engineering/coding-standards/) | Create or maintain `CODING_STANDARDS.md` for any project. Grills you on conventions, infers from the codebase, or both. Three modes: greenfield (grill-only), infer (explore-driven), or grill over existing code. |
+| [`coding-standards`](skills/engineering/coding-standards/) | Creates `CODING_STANDARDS.md` for any project. Assesses the project, recommends a curated baseline of essential principles (MUST/SHOULD/OPTIONAL), then grills you to customize. Timeless — rules only, no file paths, nothing that drifts. |
 | [`strategic-programming`](skills/engineering/strategic-programming/) | Applies strategic design discipline before writing code — deep modules, information hiding, clean seams. Use during architecture, planning, and code review. |
 | [`design-ocp`](skills/engineering/design-ocp/) | Design a codebase that's **closed for modification, open for extension**. Defines the closed core, extension points, dependency rules, and agent contract so every new feature is a new file — never an edit to stable code. |
 | [`improve-ocp`](skills/engineering/improve-ocp/) | **Retrofit** an existing messy codebase toward OCP. Scans for 7 violation signals, proposes a target OCP map, and produces an actionable `IMPROVE-OCP.md` you approve and hand to an agent. |
@@ -59,7 +59,7 @@ User-invoked — type `/skill-name` to run them.
 
 **The Problem**: Without documented conventions, every developer (and every agent) writes code a slightly different way. Files drift from one style to another. Code reviews fill up with formatting nits. New joiners — human or AI — have no compass for "how we do things here."
 
-**The Fix** is [`/coding-standards`](skills/engineering/coding-standards/). It creates a `CODING_STANDARDS.md` that tells everyone what's expected — naming, style, file organization, testing philosophy, error handling. Three modes let you start from scratch, extract conventions from existing code, or combine both. Maintenance mode catches drift so standards don't rot.
+**The Fix** is [`/coding-standards`](skills/engineering/coding-standards/). It creates a `CODING_STANDARDS.md` that tells everyone what's expected — naming, style, module boundaries, error handling, testing philosophy. The agent recommends a baseline from a curated principle catalog, classifies them by importance, and grills you to customize. The result is timeless — rules only, no file paths, nothing that goes stale.
 
 ### #3: The Codebase Turns Into A Ball Of Mud
 
@@ -92,7 +92,7 @@ User-invoked — type `/skill-name` to run them.
 - **Composable.** Skills can be installed individually or as a set. Use what fits, skip the rest.
 - **Predictable.** Every step has a completion criterion. The agent takes the same process every run.
 - **Progressive disclosure.** The `SKILL.md` is lean. Reference material lives in linked files, loaded only when needed.
-- **User-invoked.** Skills fire when you type them — never when the agent guesses.
+- **Right-invoked.** User-invoked skills fire when you type them. Model-invoked skills (like `coding-standards`) fire autonomously when the agent detects the need — zero cognitive load for you.
 
 ## License
 
