@@ -18,6 +18,8 @@ npx skills@latest add atpaawej/skills/skills/engineering/strategic-programming
 npx skills@latest add atpaawej/skills/skills/engineering/coding-standards
 npx skills@latest add atpaawej/skills/skills/engineering/design-ocp
 npx skills@latest add atpaawej/skills/skills/engineering/improve-ocp
+npx skills@latest add atpaawej/skills/skills/productivity/grilling
+npx skills@latest add atpaawej/skills/skills/productivity/grill-me
 ```
 
 ## Skills
@@ -38,6 +40,15 @@ User-invoked — type `/skill-name` to run them.
 | Skill | What it does |
 |---|---|
 | [`agent-md`](skills/project/agent-md/) | Create or update `AGENTS.md` / `CLAUDE.md` for any project. Interviews for context, generates the canonical template, or audits and updates when the project evolves. |
+
+### `productivity/` — thinking, plans, interviews
+
+> **Note:** [`grilling`](skills/productivity/grilling/) and [`grill-me`](skills/productivity/grill-me/) are from [Matt Pocock's skills repo](https://github.com/mattpocock/skills). I didn't like the new round-by-round version, so I created the previous one-question-at-a-time versions here.
+
+| Skill | What it does |
+|---|---|
+| [`grilling`](skills/productivity/grilling/) | Grill the user relentlessly about a plan, decision, or idea. Asks questions **one at a time**, waiting for feedback on each before continuing. The pre-v1.2 version of Matt's skill. |
+| [`grill-me`](skills/productivity/grill-me/) | A relentless interview to sharpen a plan or design. Delegates to `/grilling`. The pre-v1.2 version of Matt's skill. |
 
 ## Why These Skills Exist
 
