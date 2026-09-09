@@ -20,6 +20,7 @@ npx skills@latest add atpaawej/skills/skills/engineering/design-ocp
 npx skills@latest add atpaawej/skills/skills/engineering/improve-ocp
 npx skills@latest add atpaawej/skills/skills/productivity/grilling
 npx skills@latest add atpaawej/skills/skills/productivity/grill-me
+npx skills@latest add atpaawej/skills/skills/productivity/bro
 ```
 
 ## Skills
