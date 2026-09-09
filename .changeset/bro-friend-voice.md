@@ -1,0 +1,5 @@
+---
+"atpaawej-skills": minor
+---
+
+Rewrote /bro from the ground up: two friends talking an idea around, not a friendship procedure. Killed the recap-and-confirm opener ritual — the agent now reacts the way a friend would (pin it down, challenge it, say "bruh that's actually good," ask one plain sentence if it doesn't understand). Killed the turn protocol and "one point at a time, resolved before the next" — replaced with messy associative conversation, with the only guardrail being "don't dump a wall of points." Opinions now come rough and unvarnished — "that's a bad idea," "nah," "I don't buy that" — no framing wrapper. Added low-formality voice at the sentence level (contractions, fragments, casual). The agent is a participant, not a facilitator. Killed the engineered close — conversation ends naturally when it stops being interesting, or with a real "OK so we're doing X" if something actually stuck, no forced synthesis. Small anchors only: friend not facilitator, rough takes, messy and associative, actually disagree, low formality voice. Same skill, same name, same invocation — just the actual friend texture.
