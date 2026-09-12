@@ -18,6 +18,7 @@ npx skills@latest add atpaawej/skills/skills/engineering/strategic-programming
 npx skills@latest add atpaawej/skills/skills/engineering/coding-standards
 npx skills@latest add atpaawej/skills/skills/engineering/design-ocp
 npx skills@latest add atpaawej/skills/skills/engineering/improve-ocp
+npx skills@latest add atpaawej/skills/skills/engineering/senior-engineer
 npx skills@latest add atpaawej/skills/skills/productivity/grilling
 npx skills@latest add atpaawej/skills/skills/productivity/grill-me
 npx skills@latest add atpaawej/skills/skills/productivity/bro
@@ -35,6 +36,7 @@ User-invoked — type `/skill-name` to run them.
 | [`strategic-programming`](skills/engineering/strategic-programming/) | Applies strategic design discipline before writing code — deep modules, information hiding, clean seams. Use during architecture, planning, and code review. |
 | [`design-ocp`](skills/engineering/design-ocp/) | Design a codebase that's **closed for modification, open for extension**. Defines the closed core, extension points, dependency rules, and agent contract so every new feature is a new file — never an edit to stable code. |
 | [`improve-ocp`](skills/engineering/improve-ocp/) | **Retrofit** an existing messy codebase toward OCP. Scans for 7 violation signals, proposes a target OCP map, and produces an actionable `IMPROVE-OCP.md` you approve and hand to an agent. |
+| [`senior-engineer`](skills/engineering/senior-engineer/) | Turn the agent into a senior engineer for the session. REVIEW / EXPLAIN / DEBUG / DESIGN / AUDIT modes with severity-ranked review output, contract-first design, security floor, and confidence-stating discipline. Stack-agnostic. |
 
 ### `project/` — project setup
 
@@ -97,6 +99,18 @@ User-invoked — type `/skill-name` to run them.
 2. [`/improve-ocp`](skills/engineering/improve-ocp/) — retrofit. Scans existing codebases for OCP violations, produces `IMPROVE-OCP.md` you approve and hand to an agent.
 
 *You are the architect. The agent is the syntax writer. Design the interface, delegate the implementation.*
+
+### #5: The Agent Sounds Smart But Thinks Like a Junior
+
+> *"There are two ways of constructing a software design. One way is to make it so simple that there are obviously no deficiencies. The other way is to make it so complicated that there are no obvious deficiencies."*
+>
+> C.A.R. Hoare
+
+**The Problem**: Generic AI assistants answer every engineering question the same way — "here's some code that runs, with caveats." They don't surface the next-reader cost, the second-order effect, the irreversibility of the schema migration, the security floor that doesn't move when the deadline gets tight. They agree to be polite. They pad with "it depends" instead of naming the variables. They ship guesses and call them answers.
+
+**The Fix** is [`/senior-engineer`](skills/engineering/senior-engineer/). It loads a senior-engineer persona with explicit decision criteria (correctness / simplicity / maintainability / reversibility), a security floor that holds at every project phase, contract-first design discipline, severity-ranked review output, and a rule to state confidence instead of guessing. Switch modes by prefixing your message: `REVIEW:` for a strict code review, `EXPLAIN:` to teach the why, `DEBUG:` for systematic root-cause work, `DESIGN:` to spec a contract, `AUDIT:` for a read-only findings report. Default mode is collaborative peer engineering.
+
+*A senior doesn't ship guesses. A senior doesn't hide behind "it depends." A senior tells you whether you should be asking a different question.*
 
 ## Design Principles
 
