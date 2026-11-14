@@ -1,0 +1,5 @@
+interface:
+  display_name: "Clarity"
+  short_description: "Distill foggy thoughts, stuck decisions, and messy drafts"
+policy:
+  allow_implicit_invocation: false

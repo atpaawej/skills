@@ -4,7 +4,20 @@ Personal collection of agent skills for engineering and productivity workflows.
 
 ## Installation
 
-Link active skills (`engineering/`, `productivity/`, `in-progress/`) into your local agent directories (`~/.agents/skills` and `~/.claude/skills`):
+Install skills from this repo using the [Skills CLI](https://skills.sh/):
+
+```bash
+# Interactive install (choose skills and agents)
+npx skills add atpaawej/skills
+
+# Install globally across all detected agents, or pick a single skill
+npx skills add atpaawej/skills -g -y
+npx skills add atpaawej/skills --skill clarity -g
+```
+
+### Local development
+
+If you cloned this repository locally, link active skills (`engineering/`, `productivity/`, `in-progress/`) into your local agent directories (`~/.agents/skills` and `~/.claude/skills`):
 
 ```bash
 ./scripts/link-skills.sh
