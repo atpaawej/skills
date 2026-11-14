@@ -1,0 +1,3 @@
+interface:
+  display_name: "Software Factory"
+  short_description: "Autonomous issue-driven GitHub Actions factory"

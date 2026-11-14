@@ -1,0 +1,63 @@
+# Software Factory — Promote Queued
+#
+# When any issue closes as completed, every open issue labelled
+# `agent:queued` is re-checked against its native `blocked_by` dependencies.
+# The moment the last blocker closes, the issue is promoted:
+# `agent:queued` is removed, `agent:implement` is applied, and the Implement
+# workflow is dispatched via `workflow_dispatch`.
+
+name: Agent · Promote Queued
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  issues: write
+  actions: write
+
+concurrency:
+  group: agent-promote-queued
+  cancel-in-progress: false
+
+env:
+  GH_REPO: ${{ github.repository }}
+
+jobs:
+  promote:
+    if: github.event.issue.state_reason == 'completed'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Promote queued issues whose blockers have cleared
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          QUEUED=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --label agent:queued --json number --jq '.[].number')
+          [ -n "$QUEUED" ] || { echo "No queued issues."; exit 0; }
+
+          while IFS= read -r N; do
+            [ -n "$N" ] || continue
+
+            # Skip anything an active run already holds
+            if gh issue view "$N" --json labels --jq '.labels[].name' | grep -qx 'agent:in-progress'; then
+              echo "#$N: already in progress, skipping."
+              continue
+            fi
+
+            OPEN_BLOCKERS=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${N}/dependencies/blocked_by" \
+              --jq '[.[] | select(.state == "open") | .number] | join(", ")' 2>/dev/null || true)
+            if [ -n "$OPEN_BLOCKERS" ]; then
+              echo "#$N: still blocked by ${OPEN_BLOCKERS}."
+              continue
+            fi
+
+            echo "#$N: blockers cleared — promoting to agent:implement"
+            gh issue edit "$N" --remove-label agent:queued --add-label agent:implement
+            gh issue comment "$N" --body "All blockers closed — promoted to \`agent:implement\` and dispatching factory run now."
+            if ! gh workflow run agent-implement.yml --repo "$GITHUB_REPOSITORY" -f issue_number="$N"; then
+              gh issue comment "$N" --body "Automatic dispatch failed. Trigger manually with: \`gh workflow run agent-implement.yml -f issue_number=${N}\`"
+            fi
+          done <<<"$QUEUED"

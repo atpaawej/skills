@@ -1,0 +1,312 @@
+# Software Factory — Implement (Single Issue)
+#
+# Trigger: An issue labelled `agent:implement` (human or auto-promote)
+# or a manual workflow_dispatch with issue_number.
+#
+# Trust boundaries:
+# - The agent never sees GITHUB_TOKEN (scrubbed env -i execution).
+# - agent:in-progress is the execution lock; agent:blocked indicates failure.
+# - Issues with open native blockers (dependencies/blocked_by) are refused.
+# - Draft PRs are opened via the REST API to guarantee reliability.
+# - Merges are strictly human.
+
+name: Agent · Implement
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to implement"
+        required: true
+        type: number
+      model:
+        description: "Model to use for agent execution"
+        required: false
+        default: "opencode/deepseek-v4.1-flash-free"
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: agent-implement-issue-${{ github.event.issue.number || inputs.issue_number }}
+  cancel-in-progress: false
+
+env:
+  GH_REPO: ${{ github.repository }}
+
+jobs:
+  implement:
+    # Only fire when explicitly triggered by label or manual dispatch
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'agent:implement'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Resolve issue number and verify it is implementable
+        id: preflight
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number || inputs.issue_number }}
+        run: |
+          set -euo pipefail
+
+          if gh api "repos/${GITHUB_REPOSITORY}/issues/${N}" --jq 'has("pull_request")' | grep -qx true; then
+            echo "#$N is a pull request, not an issue — refusing."
+            echo "accepted=false" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          ISSUE=$(gh issue view "$N" --json state,labels,title)
+          STATE=$(jq -r '.state' <<<"$ISSUE")
+          if [ "$STATE" != "OPEN" ]; then
+            echo "Issue #$N is $STATE — nothing to do."
+            echo "accepted=false" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if jq -e '.labels[].name | select(. == "agent:in-progress")' <<<"$ISSUE" >/dev/null; then
+            echo "Issue #$N already has agent:in-progress — another run holds the lock."
+            echo "accepted=false" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BLOCKERS=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${N}/dependencies/blocked_by" \
+            --jq '[.[] | select(.state == "open") | .number] | join(", ")' 2>/dev/null || true)
+          if [ -n "$BLOCKERS" ]; then
+            gh issue comment "$N" --body "Factory refused: blocked by open issue(s) ${BLOCKERS}. Finish those first, or re-label \`agent:queued\` to auto-promote when the last blocker closes."
+            gh issue edit "$N" --remove-label agent:implement --add-label agent:blocked || true
+            echo "accepted=false" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          TITLE=$(jq -r '.title' <<<"$ISSUE")
+          SLUG=$(printf '%s' "$TITLE" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g' | cut -c1-48)
+          [ -n "$SLUG" ] || SLUG="issue"
+          BRANCH="agent/issue-${N}-${SLUG}"
+
+          gh issue edit "$N" --remove-label agent:implement --remove-label agent:blocked --add-label agent:in-progress || true
+
+          {
+            echo "accepted=true"
+            echo "branch=$BRANCH"
+            echo "title=$TITLE"
+          } >>"$GITHUB_OUTPUT"
+
+      - name: Checkout repository
+        if: steps.preflight.outputs.accepted == 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Create working branch
+        if: steps.preflight.outputs.accepted == 'true'
+        run: |
+          set -euo pipefail
+          git config user.name "software-factory[bot]"
+          git config user.email "software-factory[bot]@users.noreply.github.com"
+          git switch -c "${{ steps.preflight.outputs.branch }}"
+
+      - name: Setup runtime environment
+        if: steps.preflight.outputs.accepted == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.preflight.outputs.accepted == 'true'
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install
+          fi
+
+      - name: Install opencode agent runner
+        if: steps.preflight.outputs.accepted == 'true'
+        run: |
+          curl -fsSL https://opencode.ai/v2/install | bash -s -- --version 2.2.5 --no-modify-path
+          export PATH="$HOME/.opencode/bin:$PATH"
+          opencode --version
+
+      - name: Build agent prompt from issue
+        if: steps.preflight.outputs.accepted == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number || inputs.issue_number }}
+        run: |
+          set -euo pipefail
+          {
+            printf 'Implement GitHub issue #%s in this repository.\n\n' "$N"
+            printf 'Read repository conventions and documentation before modifying code.\n\n'
+            printf 'The issue to implement:\n\n'
+            gh issue view "$N" --json title,body,comments --jq '"## " + .title + "\n\n" + .body + (if (.comments | length) > 0 then "\n\n## Maintainer Guidance:\n\n" + ([.comments[].body] | join("\n\n---\n\n")) else "" end)'
+            printf '\n\nRules:\n'
+            printf -- '- You are already on the branch for this work. Do not create or switch branches.\n'
+            printf -- '- Do NOT push, do NOT open a PR, do NOT touch GitHub in any way.\n'
+            printf -- '- Do NOT modify or create any files in .github/.\n'
+            printf -- '- Make the smallest clean change that satisfies the acceptance criteria.\n'
+            printf -- '- Run the test, typecheck, and build commands; they must all pass.\n'
+            printf -- '- Commit your work in small commits with messages like "Part of #%s: ...".\n' "$N"
+            printf -- '- If you are genuinely blocked, stop and leave a note in .factory-blocked.txt explaining why.\n'
+            printf '\nBefore you finish, write the pull request description to /tmp/factory-pr-body.md.\n'
+            printf 'If your tools cannot write outside the repository, write `.factory-pr-body.md` in the repository root instead.\n'
+            printf 'It becomes the body of the draft PR, so write it for a reviewer who has not seen your work.\n\n'
+            printf 'Use exactly these headings:\n\n'
+            printf '## Summary\n'
+            printf 'Two to four sentences: what this change makes possible.\n\n'
+            printf '## What changed\n'
+            printf 'Grouped by module or component, with file paths. Not a raw file dump.\n\n'
+            printf '## Decisions and deviations\n'
+            printf 'Anything a reviewer cannot infer from the diff, including departures from the original spec.\n\n'
+            printf '## Verification\n'
+            printf 'The exact commands you ran and their outcome. Never claim a check you did not run.\n\n'
+            printf '## Gaps and follow-ups\n'
+            printf 'What you deliberately did not do, and what a reviewer should know.\n\n'
+            printf '## Review guide\n'
+            printf 'Where to start reading, and what deserves the most scrutiny.\n\n'
+            printf 'Rules for that file: no title line; do not write "Closes/Fixes/Resolves #N"; keep it under 4000 characters; write only what you verified.\n'
+          } > /tmp/factory-prompt.txt
+
+      - name: Run agent (tokenless cleanroom)
+        if: steps.preflight.outputs.accepted == 'true'
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.config/opencode"
+          printf '{ "session": { "permissions": "autoaccept" } }\n' > "$HOME/.config/opencode/cli.json"
+          
+          # Cleanroom isolation: env -i strips GITHUB_TOKEN
+          env -i HOME="$HOME" PATH="$PATH" TERM=dumb CI=true \
+            OPENCODE_API_KEY="$OPENCODE_API_KEY" \
+            MODEL="${{ inputs.model || 'opencode/deepseek-v4.1-flash-free' }}" bash -lc \
+            'cd "$1" && timeout 38m opencode run --model "$MODEL" "$(cat /tmp/factory-prompt.txt)"' \
+            _ "$GITHUB_WORKSPACE"
+
+      - name: Commit any uncommitted changes
+        if: steps.preflight.outputs.accepted == 'true'
+        env:
+          N: ${{ github.event.issue.number || inputs.issue_number }}
+        run: |
+          set -euo pipefail
+          if [ -f .factory-pr-body.md ]; then
+            mv -f .factory-pr-body.md /tmp/factory-pr-body.md
+          fi
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Part of #${N}: factory catch-all commit"
+          fi
+
+      - name: Verify work was produced
+        id: diffcheck
+        if: steps.preflight.outputs.accepted == 'true'
+        run: |
+          set -euo pipefail
+          AHEAD=$(git rev-list --count origin/main..HEAD)
+          echo "commits ahead of main: $AHEAD"
+          if [ "$AHEAD" -eq 0 ]; then
+            REASON="(no commits produced by the agent)"
+            [ -f .factory-blocked.txt ] && REASON=$(cat .factory-blocked.txt)
+            echo "reason=$REASON" >>"$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Push branch
+        id: push
+        if: steps.preflight.outputs.accepted == 'true' && steps.diffcheck.outcome == 'success'
+        env:
+          BRANCH: ${{ steps.preflight.outputs.branch }}
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git rebase origin/main
+          git push --force origin "HEAD:refs/heads/${BRANCH}"
+
+      - name: Open draft pull request
+        id: pr
+        continue-on-error: true
+        if: steps.preflight.outputs.accepted == 'true' && steps.diffcheck.outcome == 'success' && steps.push.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number || inputs.issue_number }}
+          BRANCH: ${{ steps.preflight.outputs.branch }}
+          TITLE: ${{ steps.preflight.outputs.title }}
+          MODEL: ${{ inputs.model || 'opencode/deepseek-v4.1-flash-free' }}
+        run: |
+          set -euo pipefail
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          BODY_SOURCE=$(bash .github/scripts/build-pr-body.sh "$N" "$MODEL" "$RUN_URL")
+          BODY=$(cat /tmp/factory-pr-body.out.md)
+          echo "body_source=$BODY_SOURCE" >>"$GITHUB_OUTPUT"
+
+          EXISTING=$(gh api --method GET "repos/${GITHUB_REPOSITORY}/pulls" \
+            -f state=open \
+            -f "head=${GITHUB_REPOSITORY_OWNER}:${BRANCH}" \
+            --jq '.[0] // empty | "\(.number) \(.html_url)"')
+
+          if [ -n "$EXISTING" ]; then
+            NUM=${EXISTING%% *}
+            PR_URL=${EXISTING#* }
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/pulls/${NUM}" \
+              -f body="$BODY" >/dev/null 2>&1 || true
+          else
+            PR_URL=$(gh api --method POST "repos/${GITHUB_REPOSITORY}/pulls" \
+              -f title="$TITLE" \
+              -f head="$BRANCH" \
+              -f base=main \
+              -f body="$BODY" \
+              -F draft=true \
+              --jq '.html_url')
+          fi
+
+          echo "url=$PR_URL" >>"$GITHUB_OUTPUT"
+
+      - name: Report PR outcome
+        if: always() && steps.preflight.outputs.accepted == 'true' && steps.diffcheck.outcome == 'success' && steps.push.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number || inputs.issue_number }}
+          BRANCH: ${{ steps.preflight.outputs.branch }}
+          TITLE: ${{ steps.preflight.outputs.title }}
+          PR_OUTCOME: ${{ steps.pr.outcome }}
+          PR_URL: ${{ steps.pr.outputs.url }}
+          BODY_SOURCE: ${{ steps.pr.outputs.body_source }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [ "$PR_OUTCOME" = "success" ] && [ -n "$PR_URL" ]; then
+            NOTE=""
+            if [ "$BODY_SOURCE" = "fallback" ]; then
+              NOTE=$'\n\nThe agent left no PR description; body was generated from commits and diffstat.'
+            fi
+            gh issue comment "$N" --body "Factory run opened draft PR: ${PR_URL}.${NOTE}" || true
+            exit 0
+          fi
+
+          gh issue comment "$N" --body "$(printf 'Implementation pushed to `%s`, but draft PR creation failed.\n\nOpen manually:\n```\ngh pr create --draft --base main --head %s --title "%s"\n```\nRun log: %s\n' "$BRANCH" "$BRANCH" "$TITLE" "$RUN_URL")" || true
+
+      - name: Report failure
+        if: failure() && !(steps.push.outcome == 'success' && steps.pr.outcome == 'failure')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number || inputs.issue_number }}
+          REASON: ${{ steps.diffcheck.outputs.reason }}
+        run: |
+          DETAIL=""
+          [ -n "$REASON" ] && DETAIL=$(printf '\n\n**Reason:** %s' "$REASON")
+          gh issue edit "$N" --add-label agent:blocked --remove-label agent:implement || true
+          gh issue comment "$N" --body "Factory run failed — see ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Resolve the issue, then re-add \`agent:implement\` to retry.${DETAIL}" || true
+
+      - name: Clear in-progress lock
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.event.issue.number || inputs.issue_number }}
+        run: gh issue edit "$N" --remove-label agent:in-progress || true
