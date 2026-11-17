@@ -1,0 +1,3 @@
+interface:
+  display_name: "Prove It"
+  short_description: "Judge and write tests on what they prove, not how they're built"
